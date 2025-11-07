@@ -34,7 +34,11 @@ final class User: Model, Content, @unchecked Sendable {
     @Children(for: \.$user)
     var tokens: [UserToken]
     
+    @Siblings(through: ActivityParticipant.self, from: \.$user, to: \.$activity)
+    var activities: [Activity]
     
+    @Siblings(through: ExpenseParticipant.self, from: \.$user, to: \.$expense)
+    var expenses: [Expense]
     
     init() {}
     
