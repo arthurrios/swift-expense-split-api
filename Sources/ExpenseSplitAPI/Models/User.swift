@@ -31,6 +31,9 @@ final class User: Model, Content, @unchecked Sendable {
     var updatedAt: Date?
     
     // Relationships
+    @Children(for: \.$user)
+    var tokens: [UserToken]
+    
     
     
     init() {}
