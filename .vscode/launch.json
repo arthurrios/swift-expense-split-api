@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:ExpenseSplitAPI}",
+      "name": "Debug ExpenseSplitAPI",
+      "program": "${workspaceFolder:ExpenseSplitAPI}/.build/debug/ExpenseSplitAPI",
+      "preLaunchTask": "swift: Build Debug ExpenseSplitAPI"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:ExpenseSplitAPI}",
+      "name": "Release ExpenseSplitAPI",
+      "program": "${workspaceFolder:ExpenseSplitAPI}/.build/release/ExpenseSplitAPI",
+      "preLaunchTask": "swift: Build Release ExpenseSplitAPI"
+    }
+  ]
+}
