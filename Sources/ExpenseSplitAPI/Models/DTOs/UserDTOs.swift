@@ -52,6 +52,13 @@ struct SignUpRequest: Content {
     }
 }
 
+struct SignUpResponse: Content {
+    let id: UUID
+    let name: String
+    let email: String
+    let token: String
+}
+
 struct SignInRequest: Content {
     let email: String
     let password: String
@@ -74,5 +81,44 @@ struct SignInRequest: Content {
                 locale: req.locale
             )
         }
+        
+        if password.isEmpty {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .signinPasswordRequired,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        if password.count < 8 {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .signupPasswordMinLength,
+                arguments: ["min": "8"],
+                locale: req.locale
+            )
+        }
+    }
+}
+
+struct SignInResponse: Content {
+    let id: UUID
+    let name: String
+    let email: String
+    let token: String
+}
+
+struct UserProfileResponse: Content {
+    let id: UUID
+    let name: String
+    let email: String
+    let createdAt: Date?
+    
+    init(from user: User) {
+        self.id = user.id!
+        self.name = user.name
+        self.email = user.email
+        self.createdAt = user.createdAt
     }
 }

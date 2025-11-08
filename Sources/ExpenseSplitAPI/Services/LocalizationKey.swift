@@ -6,6 +6,8 @@
 //
 
 enum LocalizationKey: String {
+    
+    // MARK: - User Errors
     case signupNameMinLength = "errors.signup.name.minLength"
     case signupEmailInvalid = "errors.signup.email.invalid"
     case signupPasswordMinLength = "errors.signup.password.minLength"
@@ -13,4 +15,6 @@ enum LocalizationKey: String {
     case signinPasswordRequired = "errors.signin.password.required"
     case generalInvalidRequest = "errors.general.invalidRequest"
     case validationDuplicateParticipants = "errors.validation.duplicateParticipants"
+    case authEmailAlreadyRegistered = "errors.auth.emailAlreadyRegistered"
+    case authInvalidCredentials = "errors.auth.invalidCredentials"
 }
