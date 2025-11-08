@@ -1,11 +1,14 @@
 import Vapor
 
 func routes(_ app: Application) throws {
-    app.get { req async in
-        "It works!"
+    // Simple health check
+    app.get("health") { _ async -> HTTPStatus in
+        .ok
     }
-
-    app.get("hello") { req async -> String in
-        "Hello, world!"
+    
+    app.post("api", "v1", "users", "sign-up") { req async throws -> HTTPStatus in
+        let payload = try req.content.decode(SignUpRequest.self)
+        try payload.validate(on: req)
+        return .created
     }
 }

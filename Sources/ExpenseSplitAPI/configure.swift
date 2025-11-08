@@ -49,6 +49,7 @@ public func configure(_ app: Application) async throws {
     
     // MARK: - Middleware
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    app.middleware.use(LocalizationMiddleware())
 
     // MARK: - Routes
     try routes(app)
