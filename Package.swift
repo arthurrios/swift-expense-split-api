@@ -21,6 +21,8 @@ let package = Package(
         
         // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+    
+        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.9.1"),
     ],
     targets: [
         .executableTarget(
@@ -32,6 +34,7 @@ let package = Package(
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI")
             ],
             resources: [
                 .process("Resources")
