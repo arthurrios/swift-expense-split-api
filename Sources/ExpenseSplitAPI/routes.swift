@@ -7,13 +7,15 @@ func routes(_ app: Application) throws {
     app.get("health") { _ async -> HTTPStatus in .ok }.excludeFromOpenAPI()
     app.get { _ async -> String in "Expense Split API - Version 1.0" }.excludeFromOpenAPI()
     
-    let api = app.grouped("api", "v1")
+    // Base groups
+    let users = app.apiV1Group("users", tags: [TagObject(name: "Users")])
+    let usersProtected = users.grouped(UserAuthenticator(), User.guardMiddleware())
+        .groupedOpenAPI(auth: .bearer(id: "BearerAuth", format: "JWT"))
     
-    // Public auth routes
+    // Controllers
     let authController = AuthController()
-    let authRoutes = api.grouped("users")
     
-    authRoutes.post("sign-up", use: authController.signUp)
+    users.post("sign-up", use: authController.signUp)
         .openAPI(
             tags: "Users",
             summary: "Register a new user",
@@ -22,7 +24,7 @@ func routes(_ app: Application) throws {
             response: .type(SignUpResponse.self)
         )
     
-    authRoutes.post("sign-in", use: authController.signIn)
+    users.post("sign-in", use: authController.signIn)
         .openAPI(
             tags: "Users",
             summary: "Authenticate a user",
@@ -32,11 +34,7 @@ func routes(_ app: Application) throws {
         )
     
     // Protected routes (JWT)
-    let protected = api
-        .grouped(UserAuthenticator(), User.guardMiddleware())
-        .groupedOpenAPI(auth: .bearer(id: "BearerAuth", format: "JWT"))
-    
-    protected.get("users", "me", use: authController.getProfile)
+    usersProtected.get("me", use: authController.getProfile)
         .openAPI(
             tags: "Users",
             summary: "Get current user profile",
@@ -52,7 +50,18 @@ func routes(_ app: Application) throws {
                 description: "REST API for splitting expenses",
                 version: "1.0.0"
             ),
-            servers: [.init(url: "http://localhost:8080")]
+            servers: [.init(url: "/api/v1")],
+            map: { route in
+                guard
+                    route.path.count >= 2,
+                    route.path[0] == .constant("api"),
+                    route.path[1] == .constant("v1")
+                else {
+                    return route
+                }
+                route.path = Array(route.path.dropFirst(2))
+                return route
+            }
         )
     }
     .excludeFromOpenAPI()
