@@ -7,13 +7,15 @@ func routes(_ app: Application) throws {
     app.get("health") { _ async -> HTTPStatus in .ok }.excludeFromOpenAPI()
     app.get { _ async -> String in "Expense Split API - Version 1.0" }.excludeFromOpenAPI()
     
-    // Base groups
-    let users = app.apiV1Group("users", tags: [TagObject(name: "Users")])
-    let usersProtected = users.grouped(UserAuthenticator(), User.guardMiddleware())
-        .groupedOpenAPI(auth: .bearer(id: "BearerAuth", format: "JWT"))
-    
     // Controllers
     let authController = AuthController()
+    
+    // Base groups
+    let api = app.grouped("api", "v1")
+    let users = api.grouped("users").groupedOpenAPI(tags: TagObject(name: "Users"))
+    let usersProtected = users
+        .grouped(UserAuthenticator(), User.guardMiddleware())
+        .groupedOpenAPI(auth: .bearer(id: "BearerAuth", format: "JWT"))
     
     users.post("sign-up", use: authController.signUp)
         .openAPI(
