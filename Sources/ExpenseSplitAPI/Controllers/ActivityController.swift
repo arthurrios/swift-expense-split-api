@@ -83,11 +83,11 @@ struct ActivityController: RouteCollection {
         }
         
         // Update fields
-        if let newTitle = updateRequest.newTitle {
+        if let newTitle = updateRequest.title {
             activity.name = newTitle
         }
         
-        if let newDate = updateRequest.newActivityDate {
+        if let newDate = updateRequest.activityDate {
             activity.activityDate = newDate
         }
         
@@ -224,5 +224,46 @@ struct ActivityController: RouteCollection {
             expenses: expenses,
             totalAmountInCents: totalAmount
         )
+    }
+    
+    // MARK: - Remove Activity
+    func remove(req: Request) async throws -> HTTPStatus {
+        let user = try req.auth.require(User.self)
+        
+        guard let activityId = req.parameters.get("activityId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        guard let activity = try await Activity.find(activityId, on: req.db) else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .activityNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == activityId)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .activityNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        try await activity.delete(on: req.db)
+        
+        return .noContent
     }
 }

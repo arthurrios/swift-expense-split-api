@@ -33,11 +33,11 @@ struct CreateActivityResponse: Content {
 
 // MARK: - Update Activity
 struct UpdateActivityRequest: Content {
-    let newTitle: String?
-    let newActivityDate: Date?
+    let title: String?
+    let activityDate: Date?
     
     func validate(on req: Request) throws {
-        if let title = newTitle, title.count < 3 {
+        if let title = title, title.count < 3 {
             throw LocalizedAbortError(
                 status: .badRequest,
                 key: .activityTitleMinLength,

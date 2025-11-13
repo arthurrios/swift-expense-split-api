@@ -50,8 +50,6 @@ func routes(_ app: Application) throws {
         )
     
     // Protected - Activities
-    let activities = api.grouped("activities").groupedOpenAPI(tags: TagObject(name: "Activities"))
-    
     protected.post("activities", use: activityController.create)
         .openAPI(
             tags: "Activities",
@@ -84,6 +82,14 @@ func routes(_ app: Application) throws {
             summary: "Get activity details",
             description: "Returns detailed information about an activity, including participants and expenses.",
             response: .type(ActivityDetailResponse.self)
+        )
+    
+    protected.delete("activities", ":activityId", use: activityController.remove)
+        .openAPI(
+            tags: "Activities",
+            summary: "Delete an activity",
+            description: "Deletes an activity and all related expenses, participants, and payments. Only participants can delete an activity.",
+            response: .type(HTTPStatus.self)
         )
     
     // OpenAPI
