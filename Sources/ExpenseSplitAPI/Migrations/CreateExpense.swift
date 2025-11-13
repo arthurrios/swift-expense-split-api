@@ -13,7 +13,7 @@ struct CreateExpense: AsyncMigration {
             .id()
             .field("name", .string, .required)
             .field("amount_in_cents", .int, .required)
-            .field("payer_id", .uuid, .required, .references("users", "id"))
+            .field("payer_id", .uuid, .references("users", "id"))
             .field("activity_id", .uuid, .required, .references("activities", "id", onDelete: .cascade))
             .field("created_at", .datetime)
             .field("updated_at", .datetime)

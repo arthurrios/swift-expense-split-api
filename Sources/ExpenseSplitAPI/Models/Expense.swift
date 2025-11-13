@@ -20,8 +20,8 @@ final class Expense: Model, Content, @unchecked Sendable {
     @Field(key: "amount_in_cents")
     var amountInCents: Int
     
-    @Parent(key: "payer_id")
-    var payer: User
+    @OptionalParent(key: "payer_id")
+    var payer: User?
     
     @Parent(key: "activity_id")
     var activity: Activity
@@ -44,7 +44,7 @@ final class Expense: Model, Content, @unchecked Sendable {
     init(id: UUID? = nil,
          name: String,
          amountInCents: Int,
-         payerID: UUID,
+         payerID: UUID? = nil,
          activityID: UUID) {
         self.id = id
         self.name = name

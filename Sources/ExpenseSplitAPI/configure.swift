@@ -47,6 +47,26 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateExpenseParticipants())
     app.migrations.add(CreateExpensePayments())
     
+    // MARK: - Seed Database (optional, set SEED_DATABASE=true to enable)
+    let seedDatabase = Environment.get("SEED_DATABASE")
+    if seedDatabase == "true" {
+        app.migrations.add(SeedDatabase())
+    }
+    
+    // MARK: - Run Migrations
+    try await app.autoMigrate()
+    
+    // MARK: - Verify Seed (if enabled)
+    if seedDatabase == "true" {
+        let db = app.db
+        let userCount = try await User.query(on: db).count()
+        let activityCount = try await Activity.query(on: db).count()
+        let expenseCount = try await Expense.query(on: db).count()
+        let paymentCount = try await ExpensePayment.query(on: db).count()
+        
+        print("📊 [SEED] Users: \(userCount), Activities: \(activityCount), Expenses: \(expenseCount), Payments: \(paymentCount)")
+    }
+    
     // MARK: - Middleware
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     app.middleware.use(LocalizationMiddleware())

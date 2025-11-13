@@ -9,13 +9,13 @@ func routes(_ app: Application) throws {
     
     // Controllers
     let authController = AuthController()
+    let activityController = ActivityController()
     
     // Base groups
     let api = app.grouped("api", "v1")
+    
+    // Public routes - Users
     let users = api.grouped("users").groupedOpenAPI(tags: TagObject(name: "Users"))
-    let usersProtected = users
-        .grouped(UserAuthenticator(), User.guardMiddleware())
-        .groupedOpenAPI(auth: .bearer(id: "BearerAuth", format: "JWT"))
     
     users.post("sign-up", use: authController.signUp)
         .openAPI(
@@ -36,12 +36,54 @@ func routes(_ app: Application) throws {
         )
     
     // Protected routes (JWT)
-    usersProtected.get("me", use: authController.getProfile)
+    let protected = api
+        .grouped(UserAuthenticator(), User.guardMiddleware())
+        .groupedOpenAPI(auth: .bearer(id: "BearerAuth", format: "JWT"))
+    
+    // Protected - Users
+    protected.get("users", "me", use: authController.getProfile)
         .openAPI(
             tags: "Users",
             summary: "Get current user profile",
             description: "Returns the authenticated user's profile.",
             response: .type(UserProfileResponse.self)
+        )
+    
+    // Protected - Activities
+    let activities = api.grouped("activities").groupedOpenAPI(tags: TagObject(name: "Activities"))
+    
+    protected.post("activities", use: activityController.create)
+        .openAPI(
+            tags: "Activities",
+            summary: "Create a new activity",
+            description: "Creates a new activity and adds the creator as a participant.",
+            body: .type(CreateActivityRequest.self),
+            response: .type(CreateActivityResponse.self)
+        )
+    
+    protected.put("activities", ":activityId", use: activityController.update)
+        .openAPI(
+            tags: "Activities",
+            summary: "Update an activity",
+            description: "Updates an activity. Only participants can update.",
+            body: .type(UpdateActivityRequest.self),
+            response: .type(CreateActivityResponse.self)
+        )
+    
+    protected.get("users", ":userId", "activities", use: activityController.list)
+        .openAPI(
+            tags: "Activities",
+            summary: "List user's activities",
+            description: "Returns all activities for a user. Users can only view their own activities.",
+            response: .type(ActivityListResponse.self)
+        )
+    
+    protected.get("activities", ":activityId", use: activityController.detail)
+        .openAPI(
+            tags: "Activities",
+            summary: "Get activity details",
+            description: "Returns detailed information about an activity, including participants and expenses.",
+            response: .type(ActivityDetailResponse.self)
         )
     
     // OpenAPI

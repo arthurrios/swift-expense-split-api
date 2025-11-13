@@ -497,8 +497,8 @@ final class Expense: Model, Content {
     @Field(key: "amount_in_cents")
     var amountInCents: Int
     
-    @Parent(key: "payer_id")
-    var payer: User
+    @OptionalParent(key: "payer_id")  // Optional: can be set later
+    var payer: User?
     
     @Parent(key: "activity_id")
     var activity: Activity
@@ -518,11 +518,11 @@ final class Expense: Model, Content {
     
     init() {}
     
-    init(id: UUID? = nil, name: String, amountInCents: Int, payerID: UUID, activityID: UUID) {
+    init(id: UUID? = nil, name: String, amountInCents: Int, payerID: UUID? = nil, activityID: UUID) {
         self.id = id
         self.name = name
         self.amountInCents = amountInCents
-        self.$payer.id = payerID
+        self.$payer.id = payerID  // Can be nil
         self.$activity.id = activityID
     }
 }
@@ -701,6 +701,28 @@ struct CreateExpense: AsyncMigration {
     
     func revert(on database: Database) async throws {
         try await database.schema("expenses").delete()
+    }
+}
+```
+
+### File: `Sources/App/Migrations/MakeExpensePayerOptional.swift`
+
+**Note:** This migration makes the `payer_id` field optional, allowing expenses to be created without a payer. The payer can be set later using the `setPayer` endpoint.
+
+```swift
+import Fluent
+
+struct MakeExpensePayerOptional: AsyncMigration {
+    func prepare(on database: Database) async throws {
+        try await database.schema("expenses")
+            .field("payer_id", .uuid, .references("users", "id"))
+            .update()
+    }
+    
+    func revert(on database: Database) async throws {
+        try await database.schema("expenses")
+            .field("payer_id", .uuid, .required, .references("users", "id"))
+            .update()
     }
 }
 ```

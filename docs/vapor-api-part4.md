@@ -42,7 +42,11 @@ struct BalanceService {
         
         // Process each expense
         for expense in activity.expenses {
-            let payerId = expense.$payer.id
+            // Only process expenses with a payer set
+            guard let payerId = expense.$payer.id else {
+                continue  // Skip expenses without a payer
+            }
+            
             let totalAmount = expense.amountInCents
             
             // Payer gets credited
@@ -257,7 +261,10 @@ struct CompensationService {
             
             // Check each expense in the activity
             for expense in activity.expenses {
-                let payerId = expense.$payer.id
+                // Only process expenses with a payer set
+                guard let payerId = expense.$payer.id else {
+                    continue  // Skip expenses without a payer
+                }
                 
                 // Get expense participants
                 let expenseParticipants = try await ExpenseParticipant.query(on: db)

@@ -161,8 +161,8 @@ struct ActivityDetailResponse: Content {
         let id: UUID
         let name: String
         let amountInCents: Int
-        let payerName: String
-        let payerId: UUID
+        let payerName: String?  // Optional: null if payer not set yet
+        let payerId: UUID?      // Optional: null if payer not set yet
         let participantsCount: Int
     }
 }
@@ -177,7 +177,7 @@ import Vapor
 struct CreateExpenseRequest: Content {
     let title: String
     let amountInCents: Int
-    let payerId: UUID
+    let payerId: UUID?  // Optional: can be set later
     let participantsIds: [UUID]
     
     func validate() throws {
@@ -203,7 +203,7 @@ struct CreateExpenseResponse: Content {
     let id: UUID
     let name: String
     let amountInCents: Int
-    let payerId: UUID
+    let payerId: UUID?  // Optional: null if not set yet
     let activityId: UUID
     let participants: [ParticipantDebt]
     
@@ -214,13 +214,25 @@ struct CreateExpenseResponse: Content {
     }
 }
 
+// MARK: - Set Payer
+struct SetExpensePayerRequest: Content {
+    let payerId: UUID
+}
+
+struct SetExpensePayerResponse: Content {
+    let id: UUID
+    let name: String
+    let payerId: UUID?
+    let payerName: String?
+}
+
 // MARK: - List Expenses
 struct ExpenseListItem: Content {
     let id: UUID
     let name: String
     let totalAmountInCents: Int
     let createdAt: Date?
-    let payer: PayerInfo
+    let payer: PayerInfo?  // Optional: null if payer not set yet
     let participants: [ParticipantInfo]
     
     struct PayerInfo: Content {

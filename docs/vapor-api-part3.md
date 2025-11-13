@@ -269,8 +269,8 @@ struct ActivityController: RouteCollection {
                 id: expense.id!,
                 name: expense.name,
                 amountInCents: expense.amountInCents,
-                payerName: expense.payer.name,
-                payerId: expense.payer.id!,
+                payerName: expense.payer?.name,  // Can be nil
+                payerId: expense.$payer.id,      // Can be nil
                 participantsCount: expense.participants.count
             )
         }
@@ -404,18 +404,20 @@ struct ExpenseController: RouteCollection {
             throw Abort(.forbidden, reason: "You must be a participant of this activity")
         }
         
-        // Verify payer exists and is participant
-        guard let payer = try await User.find(createRequest.payerId, on: req.db) else {
-            throw Abort(.notFound, reason: "Payer not found")
-        }
-        
-        let payerIsParticipant = try await ActivityParticipant.query(on: req.db)
-            .filter(\.$activity.$id == activityId)
-            .filter(\.$user.$id == payer.id!)
-            .first() != nil
-        
-        guard payerIsParticipant else {
-            throw Abort(.badRequest, reason: "Payer must be a participant of the activity")
+        // If payer is provided, verify it exists and is participant
+        if let payerId = createRequest.payerId {
+            guard let payer = try await User.find(payerId, on: req.db) else {
+                throw Abort(.notFound, reason: "Payer not found")
+            }
+            
+            let payerIsParticipant = try await ActivityParticipant.query(on: req.db)
+                .filter(\.$activity.$id == activityId)
+                .filter(\.$user.$id == payer.id!)
+                .first() != nil
+            
+            guard payerIsParticipant else {
+                throw Abort(.badRequest, reason: "Payer must be a participant of the activity")
+            }
         }
         
         // Verify all participants exist and are activity participants
@@ -438,11 +440,11 @@ struct ExpenseController: RouteCollection {
             }
         }
         
-        // Create expense
+        // Create expense (payer can be nil)
         let expense = Expense(
             name: createRequest.title,
             amountInCents: createRequest.amountInCents,
-            payerID: createRequest.payerId,
+            payerID: createRequest.payerId,  // Can be nil
             activityID: activityId
         )
         
@@ -480,9 +482,68 @@ struct ExpenseController: RouteCollection {
             id: expense.id!,
             name: expense.name,
             amountInCents: expense.amountInCents,
-            payerId: expense.$payer.id,
+            payerId: expense.$payer.id,  // Can be nil
             activityId: expense.$activity.id,
             participants: participantDebts
+        )
+    }
+    
+    // MARK: - Set Payer
+    func setPayer(req: Request) async throws -> SetExpensePayerResponse {
+        let user = try req.auth.require(User.self)
+        
+        guard let expenseId = req.parameters.get("expenseId", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid expense ID")
+        }
+        
+        let setPayerRequest = try req.content.decode(SetExpensePayerRequest.self)
+        
+        // Get expense with activity
+        guard let expense = try await Expense.query(on: req.db)
+            .filter(\.$id == expenseId)
+            .with(\.$activity)
+            .first() else {
+            throw Abort(.notFound, reason: "Expense not found")
+        }
+        
+        // Verify user is participant in activity
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw Abort(.forbidden, reason: "You must be a participant of this activity")
+        }
+        
+        // Check if payer is already set
+        if expense.$payer.id != nil {
+            throw Abort(.badRequest, reason: "Payer is already set for this expense")
+        }
+        
+        // Verify payer exists and is participant
+        guard let payer = try await User.find(setPayerRequest.payerId, on: req.db) else {
+            throw Abort(.notFound, reason: "Payer not found")
+        }
+        
+        let payerIsParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == payer.id!)
+            .first() != nil
+        
+        guard payerIsParticipant else {
+            throw Abort(.badRequest, reason: "Payer must be a participant of the activity")
+        }
+        
+        // Set the payer
+        expense.$payer.id = setPayerRequest.payerId
+        try await expense.save(on: req.db)
+        
+        return SetExpensePayerResponse(
+            id: expense.id!,
+            name: expense.name,
+            payerId: expense.$payer.id,
+            payerName: payer.name
         )
     }
     
@@ -539,15 +600,18 @@ struct ExpenseController: RouteCollection {
                 )
             }
             
+            // Payer can be nil if not set yet
+            let payerInfo: ExpenseListItem.PayerInfo? = expense.$payer.id != nil ? ExpenseListItem.PayerInfo(
+                userId: expense.payer!.id!,
+                name: expense.payer!.name
+            ) : nil
+            
             expenseItems.append(ExpenseListItem(
                 id: expense.id!,
                 name: expense.name,
                 totalAmountInCents: expense.amountInCents,
                 createdAt: expense.createdAt,
-                payer: ExpenseListItem.PayerInfo(
-                    userId: expense.payer.id!,
-                    name: expense.payer.name
-                ),
+                payer: payerInfo,  // Can be nil
                 participants: participants
             ))
         }
@@ -723,10 +787,13 @@ This part covered:
    - Activity summary with payment statistics
 
 3. ✅ **ExpenseController** - Complete expense handling:
-   - Create expense with validation
+   - Create expense with validation (payer is optional - can be set later)
+   - Set payer for expenses created without one
    - Automatic amount splitting among participants
    - List expenses with payment status
    - Mark payments and track payment history
+   
+   **Note:** The `payerId` field in `CreateExpenseRequest` is optional. Expenses can be created without a payer, and the payer can be set later using the `setPayer` endpoint. This allows for more flexible expense creation workflows.
 
 4. ✅ **ParticipantController** - Participant management:
    - List all participants user has interacted with
