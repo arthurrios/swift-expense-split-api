@@ -145,6 +145,16 @@ func routes(_ app: Application) throws {
             response: .type(SetExpensePayerResponse.self)
         )
     
+    protected.post("expenses", ":expenseId", "payments", use: expenseController.markPayment)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Mark a payment for an expense",
+            description: "Records a payment made by a debtor. The authenticated user must be a participant and debtor of the expense. Payment amount cannot exceed remaining debt.",
+            body: .type(MarkPaymentRequest.self),
+            response: .type(MarkPaymentResponse.self)
+        )
+    
+    
     // OpenAPI
     app.get("openapi.json") { _ in
         app.routes.openAPI(

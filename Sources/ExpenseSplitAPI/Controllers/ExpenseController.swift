@@ -601,4 +601,93 @@ struct ExpenseController: RouteCollection {
             updatedAt: expense.updatedAt
         )
     }
+    
+    // MARK: - MArk Payment
+    func markPayment(req: Request) async throws -> MarkPaymentResponse {
+        let user = try req.auth.require(User.self)
+        
+        guard let expenseId = req.parameters.get("expenseId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let markPaymentRequest = try req.content.decode(MarkPaymentRequest.self)
+        try markPaymentRequest.validate(on: req)
+        
+        guard let expense = try await Expense.query(on: req.db)
+            .filter(\.$id == expenseId)
+            .with(\.$activity)
+            .first() else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .expenseNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .expenseNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        guard let expenseParticipant = try await ExpenseParticipant.query(on: req.db)
+            .filter(\.$expense.$id == expenseId)
+            .filter(\.$user.$id == user.id!)
+            .first() else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .expenseParticipantNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let existingPayments = try await ExpensePayment.query(on: req.db)
+            .filter(\.$expense.$id == expenseId)
+            .filter(\.$debtor.$id == user.id!)
+            .all()
+        
+        let totalPaid = existingPayments.reduce(0) { $0 + $1.amountPaidInCents }
+        let remainingDebt = expenseParticipant.amountOwedInCents - totalPaid
+        
+        guard markPaymentRequest.amountInCents <= remainingDebt else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .expensePaymentExceedsDebt,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let payment = ExpensePayment(
+            expenseID: expenseId,
+            debtorID: user.id!,
+            amountPaidInCents: markPaymentRequest.amountInCents
+        )
+        
+        try await payment.save(on: req.db)
+        
+        return MarkPaymentResponse(
+            id: payment.id!,
+            expenseId: expenseId,
+            debtorId: user.id!,
+            debtorName: user.name,
+            amountPaidInCents: markPaymentRequest.amountInCents,
+            paidAt: payment.paidAt
+        )
+    }
 }
