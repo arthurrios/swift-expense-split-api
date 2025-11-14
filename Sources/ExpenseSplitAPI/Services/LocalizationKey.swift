@@ -23,4 +23,19 @@ enum LocalizationKey: String {
     case activityNotFound = "errors.activity.notFound"
     case activityNotParticipant = "errors.activity.notParticipant"
     case activityForbidden = "errors.activity.forbidden"
+    
+    // MARK: - Expense Errors
+    case expenseTitleMinLength = "errors.expense.title.minLength"
+    case expenseAmountInvalid = "errors.expense.amount.invalid"
+    case expenseParticipantsEmpty = "errors.expense.participants.empty"
+    case expenseParticipantsDuplicate = "errors.expense.participants.duplicate"
+    case expenseNotFound = "errors.expense.notFound"
+    case expenseNotParticipant = "errors.expense.notParticipant"
+    case expensePayerNotFound = "errors.expense.payer.notFound"
+    case expensePayerNotParticipant = "errors.expense.payer.notParticipant"
+    case expenseParticipantNotFound = "errors.expense.participant.notFound"
+    case expenseParticipantNotInActivity = "errors.expense.participant.notInActivity"
+    case expensePaymentAmountInvalid = "errors.expense.payment.amount.invalid"
+    case expensePaymentExceedsDebt = "errors.expense.payment.exceedsDebt"
+    case expenseForbidden = "errors.expense.forbidden"
 }

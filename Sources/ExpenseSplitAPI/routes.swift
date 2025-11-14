@@ -10,6 +10,7 @@ func routes(_ app: Application) throws {
     // Controllers
     let authController = AuthController()
     let activityController = ActivityController()
+    let expenseController = ExpenseController()
     
     // Base groups
     let api = app.grouped("api", "v1")
@@ -47,6 +48,14 @@ func routes(_ app: Application) throws {
             summary: "Get current user profile",
             description: "Returns the authenticated user's profile.",
             response: .type(UserProfileResponse.self)
+        )
+    
+    protected.get("users", use: authController.listUsers)
+        .openAPI(
+            tags: "Users",
+            summary: "List all users",
+            description: "Returns all users. Optionally filter by activityId query parameter to identify which users are participants in a specific activity.",
+            response: .type(UserListResponse.self)
         )
     
     // Protected - Activities
@@ -90,6 +99,16 @@ func routes(_ app: Application) throws {
             summary: "Delete an activity",
             description: "Deletes an activity and all related expenses, participants, and payments. Only participants can delete an activity.",
             response: .type(HTTPStatus.self)
+        )
+    
+    // Protected - Expenses
+    protected.post("expenses", ":activityId", use: expenseController.create)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Create a new expense",
+//            description: "Creates a new expense and adds the .",
+            body: .type(CreateExpenseRequest.self),
+            response: .type(CreateExpenseResponse.self)
         )
     
     // OpenAPI

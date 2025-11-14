@@ -122,3 +122,15 @@ struct UserProfileResponse: Content {
         self.createdAt = user.createdAt
     }
 }
+
+// MARK: - List Users
+struct UserListItem: Content {
+    let id: UUID
+    let name: String
+    let email: String
+    let isInActivity: Bool?
+}
+
+struct UserListResponse: Content {
+    let users: [UserListItem]
+}

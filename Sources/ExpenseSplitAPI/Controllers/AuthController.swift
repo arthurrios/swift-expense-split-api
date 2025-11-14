@@ -94,6 +94,84 @@ struct AuthController: RouteCollection {
         return UserProfileResponse(from: user)
     }
     
+    // MARK: - List Users
+    func listUsers(req: Request) async throws -> UserListResponse {
+        let user = try req.auth.require(User.self)
+        
+        // Get all users
+        let allUsers = try await User.query(on: req.db).all()
+        
+        // Check if activityId query parameter is provided
+        let activityId = req.query[UUID.self, at: "activityId"]
+        
+        var participantUserIds: Set<UUID> = []
+        
+        if let activityId = activityId {
+            // Verify activity exists
+            guard try await Activity.find(activityId, on: req.db) != nil else {
+                throw LocalizedAbortError(
+                    status: .notFound,
+                    key: .activityNotFound,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+            
+            // Verify authenticated user is a participant of the activity
+            let isParticipant = try await ActivityParticipant.query(on: req.db)
+                .filter(\.$activity.$id == activityId)
+                .filter(\.$user.$id == user.id!)
+                .first() != nil
+            
+            guard isParticipant else {
+                throw LocalizedAbortError(
+                    status: .forbidden,
+                    key: .activityNotParticipant,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+            
+            // Get all participants of the activity
+            let participants = try await ActivityParticipant.query(on: req.db)
+                .filter(\.$activity.$id == activityId)
+                .all()
+            
+            participantUserIds = Set(participants.map { $0.$user.id })
+        }
+        
+        // Map users to response items
+        var userItems: [UserListItem] = allUsers.map { user in
+            let isInActivity: Bool? = activityId != nil ? participantUserIds.contains(user.id!) : nil
+            
+            return UserListItem(
+                id: user.id!,
+                name: user.name,
+                email: user.email,
+                isInActivity: isInActivity
+            )
+        }
+        
+        // Sort: if activityId is provided, participants first
+        if activityId != nil {
+            userItems.sort { (first, second) -> Bool in
+                let firstIsParticipant = first.isInActivity == true
+                let secondIsParticipant = second.isInActivity == true
+                
+                if firstIsParticipant && !secondIsParticipant {
+                    return true
+                } else if !firstIsParticipant && secondIsParticipant {
+                    return false
+                } else {
+                    // If both are participants or both are not, sort alphabetically by name
+                    return first.name < second.name
+                }
+            }
+        }
+        
+        return UserListResponse(users: userItems)
+    }
+    
     
     // MARK: - Helpers
     private func generateToken(for user: User, on req: Request) throws -> String {
