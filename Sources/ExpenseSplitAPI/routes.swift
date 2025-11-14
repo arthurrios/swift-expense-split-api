@@ -127,6 +127,15 @@ func routes(_ app: Application) throws {
             response: .type(ExpenseDetailResponse.self)
         )
     
+    protected.put("expenses", ":expenseId", use: expenseController.update)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Update an expense",
+            description: "Updates an expense. Only activity participants can update. All fields are optional. If participants are updated, existing participants are replaced. If amount is updated, participant amounts are recalculated.",
+            body: .type(UpdateExpenseRequest.self),
+            response: .type(CreateExpenseResponse.self)
+        )
+    
     // OpenAPI
     app.get("openapi.json") { _ in
         app.routes.openAPI(

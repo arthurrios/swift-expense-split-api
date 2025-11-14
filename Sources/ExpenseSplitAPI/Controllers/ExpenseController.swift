@@ -152,6 +152,197 @@ struct ExpenseController: RouteCollection {
         )
     }
     
+    // MARK: - Update Expense
+    func update(req: Request) async throws -> CreateExpenseResponse {
+        let user = try req.auth.require(User.self)
+        
+        guard let expenseId = req.parameters.get("expenseId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let updateRequest = try req.content.decode(UpdateExpenseRequest.self)
+        try updateRequest.validate(on: req)
+        
+        guard let expense = try await Expense.query(on: req.db)
+            .filter(\.$id == expenseId)
+            .with(\.$activity)
+            .first() else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .expenseNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let activityId = expense.$activity.id
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == activityId)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .activityNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        // Update title if provided
+        if let newTitle = updateRequest.title {
+            expense.name = newTitle
+        }
+        
+        // Update amount if provided
+        var shouldRecalculateParticipants = false
+        if let newAmount = updateRequest.amountInCents {
+            expense.amountInCents = newAmount
+            shouldRecalculateParticipants = true
+        }
+        
+        // Update payer if provided
+        if let newPayerId = updateRequest.payerId {
+            guard let _ = try await User.find(newPayerId, on: req.db) else {
+                throw LocalizedAbortError(
+                    status: .notFound,
+                    key: .expensePayerNotFound,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+            
+            let payerIsParticipant = try await ActivityParticipant.query(on: req.db)
+                .filter(\.$activity.$id == activityId)
+                .filter(\.$user.$id == newPayerId)
+                .first() != nil
+            
+            guard payerIsParticipant else {
+                throw LocalizedAbortError(
+                    status: .forbidden,
+                    key: .expensePayerNotParticipant,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+            
+            expense.$payer.id = newPayerId
+        }
+        
+        // Update participants if provided
+        if let newParticipantsIds = updateRequest.participantsIds {
+            // Validate all participants exist and are in activity
+            for participantId in newParticipantsIds {
+                guard let _ = try await User.find(participantId, on: req.db) else {
+                    throw LocalizedAbortError(
+                        status: .notFound,
+                        key: .expenseParticipantNotFound,
+                        arguments: [:],
+                        locale: req.locale
+                    )
+                }
+                
+                let participantIsInActivity = try await ActivityParticipant.query(on: req.db)
+                    .filter(\.$activity.$id == activityId)
+                    .filter(\.$user.$id == participantId)
+                    .first() != nil
+                
+                guard participantIsInActivity else {
+                    throw LocalizedAbortError(
+                        status: .forbidden,
+                        key: .expenseParticipantNotInActivity,
+                        arguments: [:],
+                        locale: req.locale
+                    )
+                }
+            }
+            
+            // Delete existing participants
+            try await ExpenseParticipant.query(on: req.db)
+                .filter(\.$expense.$id == expenseId)
+                .delete()
+            
+            // Calculate new amount per participant
+            let amountPerParticipant = expense.amountInCents / newParticipantsIds.count
+            
+            // Create new participants
+            for participantId in newParticipantsIds {
+                let expenseParticipant = ExpenseParticipant(
+                    expenseID: expenseId,
+                    userID: participantId,
+                    amountOwedInCents: amountPerParticipant
+                )
+                try await expenseParticipant.save(on: req.db)
+            }
+            
+            shouldRecalculateParticipants = false // Already recalculated
+        } else if shouldRecalculateParticipants {
+            // Recalculate amounts for existing participants
+            let existingParticipants = try await ExpenseParticipant.query(on: req.db)
+                .filter(\.$expense.$id == expenseId)
+                .all()
+            
+            guard !existingParticipants.isEmpty else {
+                throw LocalizedAbortError(
+                    status: .badRequest,
+                    key: .expenseParticipantsEmpty,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+            
+            let amountPerParticipant = expense.amountInCents / existingParticipants.count
+            
+            for participant in existingParticipants {
+                participant.amountOwedInCents = amountPerParticipant
+                try await participant.save(on: req.db)
+            }
+        }
+        
+        try await expense.save(on: req.db)
+        
+        // Load updated participants for response
+        let expenseParticipants = try await ExpenseParticipant.query(on: req.db)
+            .filter(\.$expense.$id == expenseId)
+            .with(\.$user)
+            .all()
+        
+        var participantDebts: [CreateExpenseResponse.ParticipantDebt] = []
+        for ep in expenseParticipants {
+            participantDebts.append(
+                CreateExpenseResponse.ParticipantDebt(
+                    userId: ep.$user.id,
+                    userName: ep.user.name,
+                    amountOwedInCents: ep.amountOwedInCents
+                )
+            )
+        }
+        
+        var payerName: String? = nil
+        if let payerId = expense.$payer.id {
+            let payer = try await User.find(payerId, on: req.db)!
+            payerName = payer.name
+        }
+        
+        return CreateExpenseResponse(
+            id: expense.id!,
+            name: expense.name,
+            amountInCents: expense.amountInCents,
+            payerId: expense.$payer.id,
+            payerName: payerName,
+            activityId: activityId,
+            participants: participantDebts,
+            createdAt: expense.createdAt
+        )
+    }
+    
     // MARK: - List Expenses
     func list(req: Request) async throws -> ExpenseListResponse {
         let user = try req.auth.require(User.self)

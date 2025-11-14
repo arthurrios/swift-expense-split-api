@@ -70,6 +70,54 @@ struct CreateExpenseResponse: Content {
     }
 }
 
+// MARK: - Update Expense
+struct UpdateExpenseRequest: Content {
+    let title: String?
+    let amountInCents: Int?
+    let payerId: UUID?
+    let participantsIds: [UUID]?
+    
+    func validate(on req: Request) throws {
+        if let title = title, title.count < 3 {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .expenseTitleMinLength,
+                arguments: ["min": "3"],
+                locale: req.locale
+            )
+        }
+        
+        if let amountInCents = amountInCents, amountInCents <= 0 {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .expenseAmountInvalid,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        if let participantsIds = participantsIds {
+            if participantsIds.isEmpty {
+                throw LocalizedAbortError(
+                    status: .badRequest,
+                    key: .expenseParticipantsEmpty,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+            
+            if Set(participantsIds).count != participantsIds.count {
+                throw LocalizedAbortError(
+                    status: .badRequest,
+                    key: .expenseParticipantsDuplicate,
+                    arguments: [:],
+                    locale: req.locale
+                )
+            }
+        }
+    }
+}
+
 // MARK: - Set Payer
 struct SetExpensePayerRequest: Content {
     let payerId: UUID
