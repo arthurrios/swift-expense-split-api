@@ -524,4 +524,81 @@ struct ExpenseController: RouteCollection {
             createdAt: expense.createdAt
         )
     }
+    
+    // MARK: - Set Payer
+    func setPayer(req: Request) async throws -> SetExpensePayerResponse {
+        let user = try req.auth.require(User.self)
+        
+        guard let expenseId = req.parameters.get("expenseId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let setPayerRequest = try req.content.decode(SetExpensePayerRequest.self)
+        try setPayerRequest.validate(on: req)
+        
+        guard let expense = try await Expense.query(on: req.db)
+            .filter(\.$id == expenseId)
+            .with(\.$activity)
+            .first() else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .expenseNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .expenseNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        guard let payer = try await User.find(setPayerRequest.payerId, on: req.db) else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .expensePayerNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let payerIsParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == payer.id!)
+            .first() != nil
+        
+        guard payerIsParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .expensePayerNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        expense.$payer.id = setPayerRequest.payerId
+        try await expense.save(on: req.db)
+        
+        return SetExpensePayerResponse(
+            id: expense.id!,
+            name: expense.name,
+            payerId: expense.$payer.id,
+            payerName: payer.name,
+            updatedAt: expense.updatedAt
+        )
+    }
 }

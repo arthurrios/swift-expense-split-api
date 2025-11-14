@@ -136,6 +136,15 @@ func routes(_ app: Application) throws {
             response: .type(CreateExpenseResponse.self)
         )
     
+    protected.put("expenses", ":expenseId", "payer", use: expenseController.setPayer)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Set or update expense payer",
+            description: "Sets or updates the payer for an expense. The payer must be a participant of the activity.",
+            body: .type(SetExpensePayerRequest.self),
+            response: .type(SetExpensePayerResponse.self)
+        )
+    
     // OpenAPI
     app.get("openapi.json") { _ in
         app.routes.openAPI(
