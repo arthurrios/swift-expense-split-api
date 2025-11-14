@@ -29,7 +29,7 @@ struct ExpenseController: RouteCollection {
         let createRequest = try req.content.decode(CreateExpenseRequest.self)
         try createRequest.validate(on: req)
         
-        guard let _activity = try await Activity.find(activityId, on: req.db) else {
+        guard let _ = try await Activity.find(activityId, on: req.db) else {
             throw LocalizedAbortError(
                 status: .notFound,
                 key: .activityNotFound,
@@ -53,7 +53,7 @@ struct ExpenseController: RouteCollection {
         }
         
         if let payerId = createRequest.payerId {
-            guard let _payer = try await User.find(payerId, on: req.db) else {
+            guard let _ = try await User.find(payerId, on: req.db) else {
                 throw LocalizedAbortError(
                     status: .notFound,
                     key: .expensePayerNotFound,
@@ -78,7 +78,7 @@ struct ExpenseController: RouteCollection {
         }
         
         for participantId in createRequest.participantsIds {
-            guard let _participant = try await User.find(participantId, on: req.db) else {
+            guard let _ = try await User.find(participantId, on: req.db) else {
                 throw LocalizedAbortError(
                     status: .notFound,
                     key: .expenseParticipantNotFound,
@@ -165,7 +165,7 @@ struct ExpenseController: RouteCollection {
             )
         }
         
-        guard let _activity = try await Activity.find(activityId, on: req.db) else {
+        guard let _ = try await Activity.find(activityId, on: req.db) else {
             throw LocalizedAbortError(
                 status: .notFound,
                 key: .activityNotFound,
@@ -227,5 +227,110 @@ struct ExpenseController: RouteCollection {
         }
         
         return ExpenseListResponse(expenses: expenseItems)
+    }
+    
+    // MARK: - Expense Detail
+    func detail(req: Request) async throws -> ExpenseDetailResponse {
+        let user = try req.auth.require(User.self)
+        
+        guard let expenseId = req.parameters.get("expenseId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        guard let expense = try await Expense.query(on: req.db)
+            .filter(\.$id == expenseId)
+            .with(\.$activity)
+            .first() else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .expenseNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .expenseNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        try await expense.$activity.load(on: req.db)
+        try await expense.$payer.load(on: req.db)
+        try await expense.$participants.load(on: req.db)
+        try await expense.$payments.load(on: req.db)
+        
+        for payment in expense.payments {
+            try await payment.$debtor.load(on: req.db)
+        }
+        
+        let expenseParticipants = try await ExpenseParticipant.query(on: req.db)
+            .filter(\.$expense.$id == expenseId)
+            .with(\.$user)
+            .all()
+        
+        var paymentsByParticipant: [UUID: Int] = [:]
+        for payment in expense.payments {
+            let debtorId = payment.$debtor.id
+            paymentsByParticipant[debtorId, default: 0] += payment.amountPaidInCents
+        }
+        
+        let participantsInfos: [ExpenseDetailResponse.ParticipantInfo] = expenseParticipants.map { ep in
+            let amountPaid = paymentsByParticipant[ep.$user.id, default: 0]
+            let remainingDebt = max(0, ep.amountOwedInCents - amountPaid)
+            
+            return ExpenseDetailResponse.ParticipantInfo(
+                userId: ep.$user.id,
+                name: ep.user.name,
+                email: ep.user.email,
+                amountOwedInCents: ep.amountOwedInCents,
+                amountPaidInCents: amountPaid,
+                remainingDebtInCents: remainingDebt
+            )
+        }
+        
+        var payerInfo: ExpenseDetailResponse.PayerInfo? = nil
+        if let payer = expense.payer {
+            payerInfo = ExpenseDetailResponse.PayerInfo(
+                userId: payer.id!,
+                name: payer.name,
+                email: payer.email
+            )
+        }
+        
+        let paymentInfos: [ExpenseDetailResponse.PaymentInfo] = expense.payments.map { payment in
+            ExpenseDetailResponse.PaymentInfo(
+                id: payment.id!,
+                debtorId: payment.$debtor.id,
+                debtorName: payment.debtor.name,
+                amountPaidInCents: payment.amountPaidInCents,
+                paidAt: payment.paidAt
+            )
+        }
+        
+        return ExpenseDetailResponse(
+            id: expense.id!,
+            name: expense.name,
+            amountInCents: expense.amountInCents,
+            payer: payerInfo,
+            activityId: expense.$activity.id,
+            activityName: expense.activity.name,
+            participants: participantsInfos,
+            payments: paymentInfos,
+            createdAt: expense.createdAt
+        )
     }
 }

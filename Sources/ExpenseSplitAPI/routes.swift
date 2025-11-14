@@ -119,6 +119,14 @@ func routes(_ app: Application) throws {
             response: .type(ExpenseListResponse.self)
         )
     
+    protected.get("expenses", ":expenseId", use: expenseController.detail)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Get expense details",
+            description: "Returns detailed information about an expense, including participants, payments, and remaining debts.",
+            response: .type(ExpenseDetailResponse.self)
+        )
+    
     // OpenAPI
     app.get("openapi.json") { _ in
         app.routes.openAPI(
