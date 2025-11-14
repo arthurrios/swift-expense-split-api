@@ -29,7 +29,7 @@ struct ExpenseController: RouteCollection {
         let createRequest = try req.content.decode(CreateExpenseRequest.self)
         try createRequest.validate(on: req)
         
-        guard let activity = try await Activity.find(activityId, on: req.db) else {
+        guard let _activity = try await Activity.find(activityId, on: req.db) else {
             throw LocalizedAbortError(
                 status: .notFound,
                 key: .activityNotFound,
@@ -53,7 +53,7 @@ struct ExpenseController: RouteCollection {
         }
         
         if let payerId = createRequest.payerId {
-            guard let payer = try await User.find(payerId, on: req.db) else {
+            guard let _payer = try await User.find(payerId, on: req.db) else {
                 throw LocalizedAbortError(
                     status: .notFound,
                     key: .expensePayerNotFound,
@@ -78,7 +78,7 @@ struct ExpenseController: RouteCollection {
         }
         
         for participantId in createRequest.participantsIds {
-            guard let participant = try await User.find(participantId, on: req.db) else {
+            guard let _participant = try await User.find(participantId, on: req.db) else {
                 throw LocalizedAbortError(
                     status: .notFound,
                     key: .expenseParticipantNotFound,
@@ -150,5 +150,82 @@ struct ExpenseController: RouteCollection {
             participants: participantDebts,
             createdAt: expense.createdAt
         )
+    }
+    
+    // MARK: - List Expenses
+    func list(req: Request) async throws -> ExpenseListResponse {
+        let user = try req.auth.require(User.self)
+        
+        guard let activityId = req.parameters.get("activityId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        guard let _activity = try await Activity.find(activityId, on: req.db) else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .activityNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == activityId)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .activityNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let expenses = try await Expense.query(on: req.db)
+            .filter(\.$activity.$id == activityId)
+            .with(\.$payer)
+            .with(\.$participants)
+            .all()
+        
+        // Load relationships for all expenses
+        for expense in expenses {
+            if expense.$payer.id != nil {
+                try? await expense.$payer.load(on: req.db)
+            }
+            try await expense.$participants.load(on: req.db)
+        }
+        
+        let expenseItems: [ExpenseListItem] = expenses.map { expense in
+            // Load payer if exists
+            var payerInfo: ExpenseListItem.PayerInfo? = nil
+            if let payerId = expense.$payer.id, let payer = expense.payer {
+                payerInfo = ExpenseListItem.PayerInfo(
+                    userId: payerId,
+                    name: payer.name
+                )
+            }
+            
+            
+            // Count participants
+            let participantsCount = expense.participants.count
+            
+            return ExpenseListItem(
+                id: expense.id!,
+                name: expense.name,
+                amountInCents: expense.amountInCents,
+                payer: payerInfo,
+                participantsCount: participantsCount,
+                createdAt: expense.createdAt
+            )
+        }
+        
+        return ExpenseListResponse(expenses: expenseItems)
     }
 }

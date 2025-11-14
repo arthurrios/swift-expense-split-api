@@ -102,13 +102,21 @@ func routes(_ app: Application) throws {
         )
     
     // Protected - Expenses
-    protected.post("expenses", ":activityId", use: expenseController.create)
+    protected.post("activities", ":activityId", "expenses", use: expenseController.create)
         .openAPI(
             tags: "Expenses",
             summary: "Create a new expense",
-//            description: "Creates a new expense and adds the .",
+            description: "Creates a new expense for an activity. Payer is optional and can be set later. Participants are required and will split the expense equally.",
             body: .type(CreateExpenseRequest.self),
             response: .type(CreateExpenseResponse.self)
+        )
+    
+    protected.get("activities", ":activityId", "expenses", use: expenseController.list)
+        .openAPI(
+            tags: "Expenses",
+            summary: "List expenses for an activity",
+            description: "Returns all expenses for a specific activity. Only activity participants can view expenses.",
+            response: .type(ExpenseListResponse.self)
         )
     
     // OpenAPI
