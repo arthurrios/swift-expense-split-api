@@ -341,6 +341,108 @@
         }
       }
     },
+    "errors.participant.alreadyInActivity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User is already a participant of this activity"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O usuário já é participante desta atividade"
+          }
+        }
+      }
+    },
+    "errors.participant.cannotRemoveSelf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You cannot remove yourself from the activity"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você não pode remover a si mesmo da atividade"
+          }
+        }
+      }
+    },
+    "errors.participant.duplicate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duplicate participant IDs are not allowed"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IDs de participantes duplicados não são permitidos"
+          }
+        }
+      }
+    },
+    "errors.participant.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At least one participant ID must be provided"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo menos um ID de participante deve ser fornecido"
+          }
+        }
+      }
+    },
+    "errors.participant.notFound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participant not found in this activity"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participante não encontrado nesta atividade"
+          }
+        }
+      }
+    },
+    "errors.participant.userNotFound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User not found"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuário não encontrado"
+          }
+        }
+      }
+    },
     "errors.signin.email.required" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -439,6 +541,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não são permitidos participantes duplicados"
+          }
+        }
+      }
+    },
+    "messages.participant.added" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Successfully added {count} participant(s)"
+          }
+        }
+      }
+    },
+    "messages.participant.addedMultiple" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Successfully added {count} participants"
+          }
+        }
+      }
+    },
+    "messages.participant.addedSingle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participant added successfully"
+          }
+        }
+      }
+    },
+    "messages.participant.removed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participant removed successfully"
           }
         }
       }

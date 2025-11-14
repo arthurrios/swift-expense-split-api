@@ -11,6 +11,7 @@ func routes(_ app: Application) throws {
     let authController = AuthController()
     let activityController = ActivityController()
     let expenseController = ExpenseController()
+    let participantController = ParticipantController()
     
     // Base groups
     let api = app.grouped("api", "v1")
@@ -160,6 +161,32 @@ func routes(_ app: Application) throws {
             summary: "Delete an expense",
             description: "Deletes an expense and all related participants and payments. Only activity participants can delete expenses.",
             response: .type(HTTPStatus.self)
+        )
+    
+    // Protected - Activity Participants
+    protected.post("activities", ":activityId", "participants", use: participantController.addParticipants)
+        .openAPI(
+            tags: "Participants",
+            summary: "Add participants to an activity",
+            description: "Adds one or more users as participants to an activity. Only existing activity participants can add new participants. Duplicate participants are ignored.",
+            body: .type(AddParticipantsRequest.self),
+            response: .type(AddParticipantsResponse.self)
+        )
+    
+    protected.get("activities", ":activityId", "participants", use: participantController.listParticipants)
+        .openAPI(
+            tags: "Participants",
+            summary: "List activity participants",
+            description: "Returns all participants of an activity. Only activity participants can view the participant list.",
+            response: .type(ActivityParticipantsResponse.self)
+        )
+    
+    protected.delete("activities", ":activityId", "participants", ":userId", use: participantController.removeParticipant)
+        .openAPI(
+            tags: "Participants",
+            summary: "Remove participant from activity",
+            description: "Removes a participant from an activity. Users cannot remove themselves. Only activity participants can remove other participants.",
+            response: .type(RemoveParticipantResponse.self)
         )
     
     // OpenAPI

@@ -38,4 +38,18 @@ enum LocalizationKey: String {
     case expensePaymentAmountInvalid = "errors.expense.payment.amount.invalid"
     case expensePaymentExceedsDebt = "errors.expense.payment.exceedsDebt"
     case expenseForbidden = "errors.expense.forbidden"
+    
+    // MARK: - Participant Errors
+    case participantAlreadyInActivity = "errors.participant.alreadyInActivity"
+    case participantUserNotFound = "errors.participant.userNotFound"
+    case participantCannotRemoveSelf = "errors.participant.cannotRemoveSelf"
+    case participantNotFound = "errors.participant.notFound"
+    case participantEmpty = "errors.participant.empty"
+    case participantDuplicate = "errors.participant.duplicate"
+    
+    // MARK: - Success Messages
+    case participantAdded = "messages.participant.added"
+    case participantRemoved = "messages.participant.removed"
+    case participantAddedSingle = "messages.participant.addedSingle"
+    case participantAddedMultiple = "messages.participant.addedMultiple"
 }
