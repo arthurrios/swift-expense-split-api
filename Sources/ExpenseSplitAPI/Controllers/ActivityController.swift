@@ -227,7 +227,7 @@ struct ActivityController: RouteCollection {
     }
     
     // MARK: - Remove Activity
-    func remove(req: Request) async throws -> HTTPStatus {
+    func delete(req: Request) async throws -> HTTPStatus {
         let user = try req.auth.require(User.self)
         
         guard let activityId = req.parameters.get("activityId", as: UUID.self) else {

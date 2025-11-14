@@ -93,7 +93,7 @@ func routes(_ app: Application) throws {
             response: .type(ActivityDetailResponse.self)
         )
     
-    protected.delete("activities", ":activityId", use: activityController.remove)
+    protected.delete("activities", ":activityId", use: activityController.delete)
         .openAPI(
             tags: "Activities",
             summary: "Delete an activity",
@@ -154,6 +154,13 @@ func routes(_ app: Application) throws {
             response: .type(MarkPaymentResponse.self)
         )
     
+    protected.delete("expenses", ":expenseId", use: expenseController.delete)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Delete an expense",
+            description: "Deletes an expense and all related participants and payments. Only activity participants can delete expenses.",
+            response: .type(HTTPStatus.self)
+        )
     
     // OpenAPI
     app.get("openapi.json") { _ in

@@ -690,4 +690,48 @@ struct ExpenseController: RouteCollection {
             paidAt: payment.paidAt
         )
     }
+    
+    // MARK: - Delete Expense
+    func delete(req: Request) async throws -> HTTPStatus {
+        let user = try req.auth.require(User.self)
+        
+        guard let expenseId = req.parameters.get("expenseId", as: UUID.self) else {
+            throw LocalizedAbortError(
+                status: .badRequest,
+                key: .generalInvalidRequest,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        guard let expense = try await Expense.query(on: req.db)
+            .filter(\.$id == expenseId)
+            .with(\.$activity)
+            .first() else {
+            throw LocalizedAbortError(
+                status: .notFound,
+                key: .expenseNotFound,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        let isParticipant = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$activity.$id == expense.$activity.id)
+            .filter(\.$user.$id == user.id!)
+            .first() != nil
+        
+        guard isParticipant else {
+            throw LocalizedAbortError(
+                status: .forbidden,
+                key: .expenseNotParticipant,
+                arguments: [:],
+                locale: req.locale
+            )
+        }
+        
+        try await expense.delete(on: req.db)
+        
+        return .noContent
+    }
 }
