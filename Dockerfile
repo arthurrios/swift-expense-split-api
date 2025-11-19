@@ -3,11 +3,11 @@
 # ================================
 FROM swift:6.1-noble AS build
 
-# Install OS updates
+# Install OS updates and PostgreSQL development libraries
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q update \
     && apt-get -q dist-upgrade -y \
-    && apt-get install -y libjemalloc-dev
+    && apt-get install -y libjemalloc-dev libpq-dev
 
 # Set up a build area
 WORKDIR /build
@@ -60,6 +60,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q dist-upgrade -y \
     && apt-get -q install -y \
       libjemalloc2 \
+      libpq5 \
       ca-certificates \
       tzdata \
 # If your app or its dependencies import FoundationNetworking, also install `libcurl4`.

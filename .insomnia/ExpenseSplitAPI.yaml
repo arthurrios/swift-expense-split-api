@@ -1,0 +1,912 @@
+type: collection.insomnia.rest/5.0
+name: ExpenseSplitAPI
+meta:
+  id: wrk_58d845b29f4340d6b775933004821a40
+  created: 1762614544431
+  modified: 1762614544431
+  description: ""
+collection:
+  - name: User
+    meta:
+      id: fld_aa06c42ac7594584864234a5b195e1ca
+      created: 1762620059757
+      modified: 1763590578874
+      sortKey: -1763590555814
+      description: ""
+    children:
+      - url: "{{ _.baseURL }}/users/sign-up"
+        name: Sign Up
+        meta:
+          id: req_b001a0bc743f4748a00119a1e14730c4
+          created: 1762614590199
+          modified: 1762621593208
+          isPrivate: false
+          description: ""
+          sortKey: -1762620063095
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name": "Arthur Rios",
+            	"email": "arthur@email.com",
+            	"password": "12121212"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/users/sign-in"
+        name: Sign In
+        meta:
+          id: req_aea8d1d14f514975b08bee613684235f
+          created: 1762621597378
+          modified: 1763595729097
+          isPrivate: false
+          description: ""
+          sortKey: -1758899315137
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "alice@example.com",
+            	"password": "12121212"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+            id: pair_a7dd323962024e438c197f7d42633e01
+          - name: User-Agent
+            value: insomnia/12.0.0
+            id: pair_986986dbfc0a4735b0e4c9adfcbdb933
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/users/me"
+        name: Me
+        meta:
+          id: req_59eb2b3775eb417e9152305fb8d818d9
+          created: 1762621793259
+          modified: 1763071004795
+          isPrivate: false
+          description: ""
+          sortKey: -1757038941158
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %} "
+          prefix: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/users"
+        name: List Users
+        meta:
+          id: req_d860858181c34bdabe2c76c05501f8e4
+          created: 1763078576477
+          modified: 1763153956040
+          isPrivate: false
+          description: ""
+          sortKey: -1756108754168.5
+        method: GET
+        parameters:
+          - id: pair_7c9639b058194f5ea49ff9bd46c4eef7
+            name: activityId
+            value: "{% response 'body', 'req_d9dad9e446484cc48c5d17d611c1dc58',
+              'b64::JC5pZA==::46b', 'never', 60 %}"
+            description: ""
+            disabled: true
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %} "
+          prefix: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Activities
+    meta:
+      id: fld_16336ae7279e40898f01e5857cd6faf5
+      created: 1763070789595
+      modified: 1763590572682
+      sortKey: -1763590555714
+      description: ""
+    children:
+      - url: "{{ _.baseURL }}/users/{% response 'body',
+          'req_aea8d1d14f514975b08bee613684235f', 'b64::JC5pZA==::46b', 'never',
+          60 %}/activities"
+        name: List User Activities
+        meta:
+          id: req_4c6d1f90ee1f41608ef023c6fc7982c6
+          created: 1763070795220
+          modified: 1763072958677
+          isPrivate: false
+          description: ""
+          sortKey: -1763070798235
+        method: GET
+        parameters:
+          - id: pair_51d5c575bd974048a00c58ea4be2310b
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities"
+        name: Create Activity
+        meta:
+          id: req_d9dad9e446484cc48c5d17d611c1dc58
+          created: 1763071224308
+          modified: 1763072426480
+          isPrivate: false
+          description: ""
+          sortKey: -1762845430665
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "Test",
+            	"activityDate": "{% now 'iso-8601', '' %}"
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_d9dad9e446484cc48c5d17d611c1dc58', 'b64::JC5pZA==::46b', 'never',
+          60 %}"
+        name: Update Activity
+        meta:
+          id: req_34af2e78c52b4f7ba681f9e18024d8e1
+          created: 1763071650099
+          modified: 1763088907971
+          isPrivate: false
+          description: ""
+          sortKey: -1762732746880
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"title": "Test",
+            	"activityDate": "{% now 'iso-8601', '' %}"
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_d9dad9e446484cc48c5d17d611c1dc58', 'b64::JC5pZA==::46b', 'never',
+          60 %}"
+        name: Delete Activity
+        meta:
+          id: req_7070c27bc199407885e69b4b6013573e
+          created: 1763072456592
+          modified: 1763154048753
+          isPrivate: false
+          description: ""
+          sortKey: -1762676404987.5
+        method: DELETE
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_d9dad9e446484cc48c5d17d611c1dc58', 'b64::JC5pZA==::46b', 'never',
+          60 %}"
+        name: Activity Detail
+        meta:
+          id: req_c45c021c56474096aa9fffd76f979832
+          created: 1763073001412
+          modified: 1763089933095
+          isPrivate: false
+          description: ""
+          sortKey: -1762789088772.5
+        method: GET
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_4c6d1f90ee1f41608ef023c6fc7982c6',
+          'b64::JC5hY3Rpdml0aWVzWzBdLiQuaWQ=::46b', 'never', 60 %}"
+        name: Mock Activity Detail
+        meta:
+          id: req_3e54a0b3368f418f8a0c5de5ff81e9e8
+          created: 1763089948392
+          modified: 1763090013076
+          isPrivate: false
+          description: ""
+          sortKey: -1762676404887.5
+        method: GET
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Expenses
+    meta:
+      id: fld_970718f5694843ea8c204c2e05df0824
+      created: 1763077778532
+      modified: 1763590579524
+      sortKey: -1763590555614
+      description: ""
+    children:
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_4c6d1f90ee1f41608ef023c6fc7982c6',
+          'b64::JC5hY3Rpdml0aWVzWzBdLiQuaWQ=::46b', 'never', 60 %}/expenses"
+        name: Create Expense
+        meta:
+          id: req_48526369c2604c9289b63ed5a77f8003
+          created: 1763077788885
+          modified: 1763090806205
+          isPrivate: false
+          description: ""
+          sortKey: -1763077798309
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+              "amountInCents": 23400,
+              "payerId": null,
+              "title": "Amusement park tickets",
+              "participantsIds": {% response 'body', 'req_3e54a0b3368f418f8a0c5de5ff81e9e8', 'b64::JC5wYXJ0aWNpcGFudHMuJC4uaWQ=::46b', 'never', 60 %}
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_4c6d1f90ee1f41608ef023c6fc7982c6',
+          'b64::JC5hY3Rpdml0aWVzWzBdLiQuaWQ=::46b', 'never', 60 %}/expenses"
+        name: List Activity Expenses
+        meta:
+          id: req_659713bbf45046eaab8e10a180974e6e
+          created: 1763082821195
+          modified: 1763082833312
+          isPrivate: false
+          description: ""
+          sortKey: -1763074298272
+        method: GET
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/expenses/{% response 'body',
+          'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5pZA==::46b', 'never',
+          60 %}"
+        name: Expense Details
+        meta:
+          id: req_0cfe8cdfe25c47af89667b486a4b34d7
+          created: 1763086125008
+          modified: 1763091059929
+          isPrivate: false
+          description: ""
+          sortKey: -1763072548253.5
+        method: GET
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/expenses/{% response 'body',
+          'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5pZA==::46b', 'never',
+          60 %}"
+        name: Update Expense
+        meta:
+          id: req_68e54df522aa446aa23a5fc452d25035
+          created: 1763086561516
+          modified: 1763090892389
+          isPrivate: false
+          description: ""
+          sortKey: -1763076048290.5
+        method: PUT
+        body:
+          mimeType: application/json
+          text: >-
+            {
+              "amountInCents": 24400,
+              "payerId": null,
+              "title": "Amusement park tickets",
+              "participantsIds": {% response 'body', 'req_3e54a0b3368f418f8a0c5de5ff81e9e8', 'b64::JC5wYXJ0aWNpcGFudHMuJC4uaWQ=::46b', 'never', 60 %}
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/expenses/{% response 'body',
+          'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5pZA==::46b', 'never',
+          60 %}/payer"
+        name: Set Expense Payer
+        meta:
+          id: req_73c5ba477d164b39b582a72e2aaebef1
+          created: 1763088556790
+          modified: 1763088697752
+          isPrivate: false
+          description: ""
+          sortKey: -1763075173281.25
+        method: PUT
+        body:
+          mimeType: application/json
+          text: >-
+            {
+              "payerId": "{% response 'body', 'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5wYXJ0aWNpcGFudHNbMF0uJC51c2VySWQ=::46b', 'never', 60 %}"
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/expenses/{% response 'body',
+          'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5pZA==::46b', 'never',
+          60 %}/payments"
+        name: Mark Payment
+        meta:
+          id: req_24653bfe051f40cea5725bdff5928907
+          created: 1763090263260
+          modified: 1763091100286
+          isPrivate: false
+          description: ""
+          sortKey: -1763071673244.25
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"amountInCents": 6667
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/expenses/{% response 'body',
+          'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5pZA==::46b', 'never',
+          60 %}"
+        name: Delete Expense
+        meta:
+          id: req_001b0217fe8942c6997162e88073b4e8
+          created: 1763090683289
+          modified: 1763090699005
+          isPrivate: false
+          description: ""
+          sortKey: -1763075610785.875
+        method: DELETE
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Activity Participants
+    meta:
+      id: fld_bfd41bdec84b48838f872e0a0e3c6c5d
+      created: 1763153563373
+      modified: 1763590581802
+      sortKey: -1763590555564
+      description: ""
+    children:
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_d9dad9e446484cc48c5d17d611c1dc58', 'b64::JC5pZA==::46b', 'never',
+          60 %}/participants"
+        name: Add Activity Participants
+        meta:
+          id: req_0f0947509aac4072b533ba505854e4a1
+          created: 1763153783855
+          modified: 1763153970533
+          isPrivate: false
+          description: ""
+          sortKey: -1763153786823
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+            	"participantsIds": {% response 'body', 'req_d860858181c34bdabe2c76c05501f8e4', 'b64::JC51c2Vycy4kLi5pZA==::46b', 'never', 60 %}
+            }
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_d9dad9e446484cc48c5d17d611c1dc58', 'b64::JC5pZA==::46b', 'never',
+          60 %}/participants"
+        name: List Activity Participants
+        meta:
+          id: req_ab92f82bcc2d49fa90103e42283904d1
+          created: 1763154030331
+          modified: 1763154037388
+          isPrivate: false
+          description: ""
+          sortKey: -1763115792566
+        method: GET
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_d9dad9e446484cc48c5d17d611c1dc58', 'b64::JC5pZA==::46b', 'never',
+          60 %}/participants/{% response 'body',
+          'req_ab92f82bcc2d49fa90103e42283904d1',
+          'b64::JC5wYXJ0aWNpcGFudHNbMV0uJC51c2VySWQ=::46b', 'never', 60 %}"
+        name: Remove Activity Participant
+        meta:
+          id: req_10e0a8d303ed4217bdea50a670e792f2
+          created: 1763154246692
+          modified: 1763154324827
+          isPrivate: false
+          description: ""
+          sortKey: -1763096795437.5
+        method: DELETE
+        parameters:
+          - id: pair_c5215a3fe27d4c4898566569662b15e5
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Balance
+    meta:
+      id: fld_8172048f81d6414aa62962de6341d5d0
+      created: 1763590555514
+      modified: 1763590555514
+      sortKey: -1763590555514
+      description: ""
+    children:
+      - url: "{{ _.baseURL }}/balance/between/{% response 'body',
+          'req_d860858181c34bdabe2c76c05501f8e4',
+          'b64::JC51c2Vyc1swXS4kLmlk::46b', 'never', 60 %}/{% response 'body',
+          'req_d860858181c34bdabe2c76c05501f8e4',
+          'b64::JC51c2Vyc1sxXS4kLmlk::46b', 'never', 60 %}"
+        name: Balance Between Two Users
+        meta:
+          id: req_9a9547db691147be8e5e877cf2414009
+          created: 1763590625502
+          modified: 1763590714089
+          isPrivate: false
+          description: ""
+          sortKey: -1763590628729
+        method: GET
+        parameters:
+          - id: pair_51d5c575bd974048a00c58ea4be2310b
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/balance/users/{% response 'body',
+          'req_d860858181c34bdabe2c76c05501f8e4',
+          'b64::JC51c2Vyc1swXS4kLmlk::46b', 'never', 60 %}/detailed"
+        name: Detailed Balance For User
+        meta:
+          id: req_71fd1171056b4e74a2c0383d23ed7e03
+          created: 1763590974245
+          modified: 1763590999703
+          isPrivate: false
+          description: ""
+          sortKey: -1763372207776
+        method: GET
+        parameters:
+          - id: pair_51d5c575bd974048a00c58ea4be2310b
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/activities/{% response 'body',
+          'req_4c6d1f90ee1f41608ef023c6fc7982c6',
+          'b64::JC5hY3Rpdml0aWVzWzBdLiQuaWQ=::46b', 'never', 60 %}/balance"
+        name: Activity Balance
+        meta:
+          id: req_f096c7a9644941da969c17824a07a1a5
+          created: 1763591029187
+          modified: 1763591088905
+          isPrivate: false
+          description: ""
+          sortKey: -1763262997299.5
+        method: GET
+        parameters:
+          - id: pair_51d5c575bd974048a00c58ea4be2310b
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/balance/users/{% response 'body',
+          'req_d860858181c34bdabe2c76c05501f8e4',
+          'b64::JC51c2Vyc1swXS4kLmlk::46b', 'never', 60 %}/global"
+        name: User Global Balance
+        meta:
+          id: req_2927f76be43b45dfa9768495dd4f535b
+          created: 1763591405288
+          modified: 1763591578052
+          isPrivate: false
+          description: ""
+          sortKey: -1763317602537.75
+        method: GET
+        parameters:
+          - id: pair_51d5c575bd974048a00c58ea4be2310b
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'never', 60 %}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_0480522d5a7703ec957ba3b2ff3db1db3159d73c
+    created: 1762614544434
+    modified: 1762614544434
+environments:
+  name: Base Environment
+  meta:
+    id: env_0480522d5a7703ec957ba3b2ff3db1db3159d73c
+    created: 1762614544433
+    modified: 1762621852508
+    isPrivate: false
+  data:
+    baseURL: http://localhost:8080/api/v1
+    token: ""

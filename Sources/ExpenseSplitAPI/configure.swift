@@ -6,14 +6,29 @@ import JWT
 
 // configures your application
 public func configure(_ app: Application) async throws {
-    // MARK: - Environment Configuration
-    let databaseHost = Environment.get("DATABASE_HOST") ?? "localhost"
-    let databasePort = Environment.get("DATABASE_PORT").flatMap(Int.init) ?? 5432
-    let databaseName = Environment.get("DATABASE_NAME") ?? "expense_split_dev"
-    let databaseUsername = Environment.get("DATABASE_USERNAME") ?? "vapor"
-    let databasePassword = Environment.get("DATABASE_PASSWORD") ?? "password"
+    // MARK: - Environment Detection
+    let environment = Environment.get("ENVIRONMENT") ?? "development"
+    app.logger.info("Running in \(environment) environment")
+    
+    // MARK: - Server Configuration
+    // Render uses PORT, fallback to SERVER_PORT, then default to 8080
+    let port = Environment.get("PORT").flatMap(Int.init) ?? 
+               Environment.get("SERVER_PORT").flatMap(Int.init) ?? 8080
+    app.http.server.configuration.hostname = "0.0.0.0"
+    app.http.server.configuration.port = port
     
     // MARK: - Database Configuration
+    // Render provides individual variables, not DATABASE_URL
+    guard let databaseHost = Environment.get("DATABASE_HOST"),
+          let databaseName = Environment.get("DATABASE_NAME"),
+          let databaseUsername = Environment.get("DATABASE_USERNAME"),
+          let databasePassword = Environment.get("DATABASE_PASSWORD") else {
+        app.logger.critical("Database environment variables not set!")
+        throw Abort(.internalServerError, reason: "Database configuration missing")
+    }
+    
+    let databasePort = Environment.get("DATABASE_PORT").flatMap(Int.init) ?? 5432
+    
     let postgresConfig = SQLPostgresConfiguration(
         hostname: databaseHost,
         port: databasePort,
@@ -31,12 +46,12 @@ public func configure(_ app: Application) async throws {
     )
     
     // MARK: - JWT Configuration
-    if let jwtSecret = Environment.get("JWT_SECRET") {
-        app.jwt.signers.use(.hs256(key: jwtSecret))
-    } else {
-        app.logger.warning("JWT_SECRET not set! User default (INSECURE)")
-        app.jwt.signers.use(.hs256(key: "secret"))
+    guard let jwtSecret = Environment.get("JWT_SECRET") else {
+        app.logger.critical("JWT_SECRET environment variable not set!")
+        throw Abort(.internalServerError, reason: "JWT secret missing")
     }
+    
+    app.jwt.signers.use(.hs256(key: jwtSecret))
     
     // MARK: - Migrations
     app.migrations.add(CreateUser())
@@ -53,8 +68,17 @@ public func configure(_ app: Application) async throws {
         app.migrations.add(SeedDatabase())
     }
     
+    // MARK: - Middleware
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    app.middleware.use(LocalizationMiddleware())
+
+    // MARK: - Routes
+    try routes(app)
+    
     // MARK: - Run Migrations
+    // Always run migrations on Render (safe for production)
     try await app.autoMigrate()
+    app.logger.info("Migrations completed successfully")
     
     // MARK: - Verify Seed (if enabled)
     if seedDatabase == "true" {
@@ -64,13 +88,8 @@ public func configure(_ app: Application) async throws {
         let expenseCount = try await Expense.query(on: db).count()
         let paymentCount = try await ExpensePayment.query(on: db).count()
         
-        print("📊 [SEED] Users: \(userCount), Activities: \(activityCount), Expenses: \(expenseCount), Payments: \(paymentCount)")
+        app.logger.info("📊 [SEED] Users: \(userCount), Activities: \(activityCount), Expenses: \(expenseCount), Payments: \(paymentCount)")
     }
     
-    // MARK: - Middleware
-    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-    app.middleware.use(LocalizationMiddleware())
-
-    // MARK: - Routes
-    try routes(app)
+    app.logger.info("Application configured successfully on port \(port)")
 }

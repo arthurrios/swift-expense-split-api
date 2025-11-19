@@ -11,3 +11,5 @@ db.sqlite
 !.env.example
 default.profraw
 .vscode/
+# Insomnia collection (uncomment the line below to ignore)
+# .insomnia/
