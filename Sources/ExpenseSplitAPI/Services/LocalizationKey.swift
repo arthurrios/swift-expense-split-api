@@ -17,6 +17,8 @@ enum LocalizationKey: String {
     case validationDuplicateParticipants = "errors.validation.duplicateParticipants"
     case authEmailAlreadyRegistered = "errors.auth.emailAlreadyRegistered"
     case authInvalidCredentials = "errors.auth.invalidCredentials"
+    case userNotFound = "errors.user.notFound"
+    case oneOrBothUsersNotFound = "errors.user.oneOrBothUsersNotFound"
     
     // MARK: - Activity Errors
     case activityTitleMinLength = "errors.activity.title.minLength"

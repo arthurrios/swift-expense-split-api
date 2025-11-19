@@ -528,6 +528,40 @@
         }
       }
     },
+    "errors.user.notFound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User not found"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "errors.user.oneOrBothUsersNotFound" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One or both users not found"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um usuário ou ambos não encontrados"
+          }
+        }
+      }
+    },
     "errors.validation.duplicateParticipants" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -553,6 +587,12 @@
             "state" : "translated",
             "value" : "Successfully added {count} participant(s)"
           }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionados {count} participante(s) com sucesso"
+          }
         }
       }
     },
@@ -563,6 +603,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Successfully added {count} participants"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionados {count} participantes com sucesso"
           }
         }
       }
@@ -575,6 +621,12 @@
             "state" : "translated",
             "value" : "Participant added successfully"
           }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participante adicionado com sucesso"
+          }
         }
       }
     },
@@ -585,6 +637,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Participant removed successfully"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Participante removido com sucesso"
           }
         }
       }

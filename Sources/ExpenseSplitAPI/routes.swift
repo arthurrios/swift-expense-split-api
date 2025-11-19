@@ -12,6 +12,7 @@ func routes(_ app: Application) throws {
     let activityController = ActivityController()
     let expenseController = ExpenseController()
     let participantController = ParticipantController()
+    let balanceController = BalanceController()
     
     // Base groups
     let api = app.grouped("api", "v1")
@@ -188,6 +189,40 @@ func routes(_ app: Application) throws {
             description: "Removes a participant from an activity. Users cannot remove themselves. Only activity participants can remove other participants.",
             response: .type(RemoveParticipantResponse.self)
         )
+    
+    // Protected - Balance
+    protected.get("activities", ":activityId", "balance", use: balanceController.getActivityBalance)
+        .openAPI(
+            tags: "Balance",
+            summary: "Get activity balance",
+            description: "Returns the balance for a specific activity, showing who owes whom. Only activity participants can view the balance.",
+            response: .type(ActivityBalanceResponse.self)
+        )
+    
+    protected.get("balance", "between", ":userId1", ":userId2", use: balanceController.getBalanceBetweenUsers)
+        .openAPI(
+            tags: "Balance",
+            summary: "Get balance between two users",
+            description: "Returns the net balance between two users across all shared activities (global compensation). The authenticated user must be one of the two users.",
+            response: .type(BalanceBetweenUsersResponse.self)
+        )
+    
+    protected.get("balance", "users", ":userId", "global", use: balanceController.getUserGlobalBalance)
+        .openAPI(
+            tags: "Balance",
+            summary: "Get user global balance",
+            description: "Returns the user's global balance across all activities with compensations. Shows who owes the user and who the user owes, with net amounts per person.",
+            response: .type(UserGlobalBalanceResponse.self)
+        )
+    
+    protected.get("balance", "users", ":userId", "detailed", use: balanceController.getDetailedBalance)
+        .openAPI(
+            tags: "Balance",
+            summary: "Get detailed balance for user",
+            description: "Returns a detailed breakdown of all debts and credits for a user across all activities, without compensation. Shows individual expenses and amounts.",
+            response: .type(DetailedBalanceResponse.self)
+        )
+    
     
     // OpenAPI
     app.get("openapi.json") { _ in
