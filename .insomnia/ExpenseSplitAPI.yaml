@@ -1,4 +1,5 @@
 type: collection.insomnia.rest/5.0
+schema_version: "5.1"
 name: ExpenseSplitAPI
 meta:
   id: wrk_58d845b29f4340d6b775933004821a40
@@ -65,10 +66,8 @@ collection:
         headers:
           - name: Content-Type
             value: application/json
-            id: pair_a7dd323962024e438c197f7d42633e01
           - name: User-Agent
             value: insomnia/12.0.0
-            id: pair_986986dbfc0a4735b0e4c9adfcbdb933
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -114,8 +113,39 @@ collection:
           sortKey: -1756108754168.5
         method: GET
         parameters:
-          - id: pair_7c9639b058194f5ea49ff9bd46c4eef7
-            name: activityId
+          - name: activityId
+            value: "{% response 'body', 'req_d9dad9e446484cc48c5d17d611c1dc58',
+              'b64::JC5pZA==::46b', 'never', 60 %}"
+            description: ""
+            disabled: true
+        headers:
+          - name: User-Agent
+            value: insomnia/12.0.0
+        authentication:
+          type: bearer
+          token: "{% response 'body', 'req_aea8d1d14f514975b08bee613684235f',
+            'b64::JC50b2tlbg==::46b', 'always', 60 %} "
+          prefix: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}/users/me/statistics"
+        name: User Expense Statistics
+        meta:
+          id: req_ef2ce721f7f04007bb88a5e208a71f04
+          created: 1764419993983
+          modified: 1764420069380
+          isPrivate: false
+          description: ""
+          sortKey: -1755643660673.75
+        method: GET
+        parameters:
+          - name: activityId
             value: "{% response 'body', 'req_d9dad9e446484cc48c5d17d611c1dc58',
               'b64::JC5pZA==::46b', 'never', 60 %}"
             description: ""
@@ -156,12 +186,6 @@ collection:
           description: ""
           sortKey: -1763070798235
         method: GET
-        parameters:
-          - id: pair_51d5c575bd974048a00c58ea4be2310b
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -194,12 +218,6 @@ collection:
             	"title": "Test",
             	"activityDate": "{% now 'iso-8601', '' %}"
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -236,12 +254,6 @@ collection:
             	"title": "Test",
             	"activityDate": "{% now 'iso-8601', '' %}"
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -271,12 +283,6 @@ collection:
           description: ""
           sortKey: -1762676404987.5
         method: DELETE
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -304,12 +310,6 @@ collection:
           description: ""
           sortKey: -1762789088772.5
         method: GET
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -337,12 +337,6 @@ collection:
           description: ""
           sortKey: -1762676404887.5
         method: GET
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -387,12 +381,6 @@ collection:
               "title": "Amusement park tickets",
               "participantsIds": {% response 'body', 'req_3e54a0b3368f418f8a0c5de5ff81e9e8', 'b64::JC5wYXJ0aWNpcGFudHMuJC4uaWQ=::46b', 'never', 60 %}
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -422,12 +410,6 @@ collection:
           description: ""
           sortKey: -1763074298272
         method: GET
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -455,12 +437,6 @@ collection:
           description: ""
           sortKey: -1763072548253.5
         method: GET
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -497,12 +473,6 @@ collection:
               "title": "Amusement park tickets",
               "participantsIds": {% response 'body', 'req_3e54a0b3368f418f8a0c5de5ff81e9e8', 'b64::JC5wYXJ0aWNpcGFudHMuJC4uaWQ=::46b', 'never', 60 %}
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -538,12 +508,6 @@ collection:
             {
               "payerId": "{% response 'body', 'req_48526369c2604c9289b63ed5a77f8003', 'b64::JC5wYXJ0aWNpcGFudHNbMF0uJC51c2VySWQ=::46b', 'never', 60 %}"
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -579,12 +543,6 @@ collection:
             {
             	"amountInCents": 6667
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -614,12 +572,6 @@ collection:
           description: ""
           sortKey: -1763075610785.875
         method: DELETE
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -661,12 +613,6 @@ collection:
             {
             	"participantsIds": {% response 'body', 'req_d860858181c34bdabe2c76c05501f8e4', 'b64::JC51c2Vycy4kLi5pZA==::46b', 'never', 60 %}
             }
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: Content-Type
             value: application/json
@@ -696,12 +642,6 @@ collection:
           description: ""
           sortKey: -1763115792566
         method: GET
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -731,12 +671,6 @@ collection:
           description: ""
           sortKey: -1763096795437.5
         method: DELETE
-        parameters:
-          - id: pair_c5215a3fe27d4c4898566569662b15e5
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -774,12 +708,6 @@ collection:
           description: ""
           sortKey: -1763590628729
         method: GET
-        parameters:
-          - id: pair_51d5c575bd974048a00c58ea4be2310b
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -807,12 +735,6 @@ collection:
           description: ""
           sortKey: -1763372207776
         method: GET
-        parameters:
-          - id: pair_51d5c575bd974048a00c58ea4be2310b
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -840,12 +762,6 @@ collection:
           description: ""
           sortKey: -1763262997299.5
         method: GET
-        parameters:
-          - id: pair_51d5c575bd974048a00c58ea4be2310b
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
@@ -873,12 +789,6 @@ collection:
           description: ""
           sortKey: -1763317602537.75
         method: GET
-        parameters:
-          - id: pair_51d5c575bd974048a00c58ea4be2310b
-            name: ""
-            value: ""
-            description: ""
-            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/12.0.0
