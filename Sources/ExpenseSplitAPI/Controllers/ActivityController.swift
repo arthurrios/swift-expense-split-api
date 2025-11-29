@@ -135,10 +135,22 @@ struct ActivityController: RouteCollection {
         
         let activities = activityParticipants.map { $0.activity }
         
+        for activity in activities {
+            try await activity.$participants.load(on: req.db)
+        }
+        
         let activityItems: [ActivityListItem] = activities.map { activity in
             let totalAmount = activity.expenses.reduce(0) { $0 + $1.amountInCents }
             let participantsCount = activity.participants.count
             let expensesCount = activity.expenses.count
+            
+            let participants = activity.participants.map { participant in
+                ActivityListItem.ParticipantInfo(
+                    id: participant.id!,
+                    name: participant.name,
+                    email: participant.email
+                )
+            }
             
             return ActivityListItem(
                 id: activity.id!,
@@ -146,6 +158,7 @@ struct ActivityController: RouteCollection {
                 totalAmountInCents: totalAmount,
                 activityDate: activity.activityDate,
                 participantsAmount: participantsCount,
+                participants: participants,
                 expensesAmount: expensesCount
             )
         }

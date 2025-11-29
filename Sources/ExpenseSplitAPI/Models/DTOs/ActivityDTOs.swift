@@ -55,7 +55,14 @@ struct ActivityListItem: Content {
     let totalAmountInCents: Int
     let activityDate: Date
     let participantsAmount: Int
+    let participants: [ParticipantInfo]
     let expensesAmount: Int
+    
+    struct ParticipantInfo: Content {
+        let id: UUID
+        let name: String
+        let email: String
+    }
 }
 
 struct ActivityListResponse: Content {
