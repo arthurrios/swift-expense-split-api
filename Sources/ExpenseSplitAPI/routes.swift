@@ -60,6 +60,14 @@ func routes(_ app: Application) throws {
             response: .type(UserListResponse.self)
         )
     
+    protected.get("users", "me", "statistics", use: authController.getUserExpenseStatistics)
+        .openAPI(
+            tags: "Users",
+            summary: "Get user expense statistics",
+            description: "Returns comprehensive statistics about the authenticated user's expenses, including amounts paid, amounts to pay, total expenses, activity count, expense count, and number of unique participants.",
+            response: .type(UserExpenseStatisticsResponse.self)
+        )
+    
     // Protected - Activities
     protected.post("activities", use: activityController.create)
         .openAPI(

@@ -172,6 +172,93 @@ struct AuthController: RouteCollection {
         return UserListResponse(users: userItems)
     }
     
+    // MARK: - User Expense Statistics
+    func getUserExpenseStatistics(req: Request) async throws -> UserExpenseStatisticsResponse {
+        let user = try req.auth.require(User.self)
+        let userId = user.id!
+        
+        // 1. Amount paid: Sum of all ExpensePayment where user is debtor
+        //    Also count distinct expenses with payments
+        let payments = try await ExpensePayment.query(on: req.db)
+            .filter(\.$debtor.$id == userId)
+            .all()
+        let amountPaidInCents = payments.reduce(0) { $0 + $1.amountPaidInCents }
+        
+        // Count distinct expenses where the user has made payments
+        let paidExpenseIds = Set(payments.map { $0.$expense.id })
+        let paidExpensesCount = paidExpenseIds.count
+        
+        // 2. Amount to pay: Sum of (amountOwed - amountPaid) for all ExpenseParticipant
+        //    Also count expenses with remaining debt
+        let expenseParticipants = try await ExpenseParticipant.query(on: req.db)
+            .filter(\.$user.$id == userId)
+            .all()
+        
+        var amountToPayInCents = 0
+        var expensesWithDebt: Set<UUID> = []
+        
+        for ep in expenseParticipants {
+            let expenseId = ep.$expense.id
+            let paymentsForExpense = try await ExpensePayment.query(on: req.db)
+                .filter(\.$expense.$id == expenseId)
+                .filter(\.$debtor.$id == userId)
+                .all()
+            let totalPaid = paymentsForExpense.reduce(0) { $0 + $1.amountPaidInCents }
+            let remaining = max(0, ep.amountOwedInCents - totalPaid)
+            
+            if remaining > 0 {
+                amountToPayInCents += remaining
+                expensesWithDebt.insert(expenseId)
+            }
+        }
+        
+        let expensesToPayCount = expensesWithDebt.count
+        
+        // 3. Total expenses amount: Sum of all Expense.amountInCents where user is participant
+        var totalExpensesAmountInCents = 0
+        for ep in expenseParticipants {
+            let expense = try await Expense.find(ep.$expense.id, on: req.db)
+            if let expense = expense {
+                totalExpensesAmountInCents += expense.amountInCents
+            }
+        }
+        
+        // 4. Number of activities: Count of ActivityParticipant where user is participant
+        let activitiesCount = try await ActivityParticipant.query(on: req.db)
+            .filter(\.$user.$id == userId)
+            .count()
+
+        // 5. Number of expenses: Count of ExpenseParticipant where user is participant
+        let expensesCount = expenseParticipants.count
+
+        // 6. Number of unique participants: Count distinct users from ExpenseParticipant
+        // where user shares expenses (same expense participants, excluding self)
+        var uniqueParticipantsIds: Set<UUID> = []
+        for ep in expenseParticipants {
+            let expenseId = ep.$expense.id
+            let otherParticipants = try await ExpenseParticipant.query(on: req.db)
+                .filter(\.$expense.$id == expenseId)
+                .all()
+            for otherEp in otherParticipants {
+                if otherEp.$user.id != userId {
+                    uniqueParticipantsIds.insert(otherEp.$user.id)
+                }
+            }
+        }
+        let uniqueParticipantsCount = uniqueParticipantsIds.count
+        
+        return UserExpenseStatisticsResponse(
+            amountPaidInCents: amountPaidInCents,
+            paidExpensesCount: paidExpensesCount,
+            amountToPayInCents: amountToPayInCents,
+            expensesToPayCount: expensesToPayCount,
+            totalExpensesAmountInCents: totalExpensesAmountInCents,
+            activitiesCount: activitiesCount,
+            expensesCount: expensesCount,
+            uniqueParticipantsCount: uniqueParticipantsCount
+        )
+    }
+    
     
     // MARK: - Helpers
     private func generateToken(for user: User, on req: Request) throws -> String {

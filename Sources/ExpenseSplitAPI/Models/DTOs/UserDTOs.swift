@@ -134,3 +134,15 @@ struct UserListItem: Content {
 struct UserListResponse: Content {
     let users: [UserListItem]
 }
+
+// MARK: - User Expense Statistics
+struct UserExpenseStatisticsResponse: Content {
+    let amountPaidInCents: Int
+    let paidExpensesCount: Int
+    let amountToPayInCents: Int
+    let expensesToPayCount: Int
+    let totalExpensesAmountInCents: Int
+    let activitiesCount: Int
+    let expensesCount: Int
+    let uniqueParticipantsCount: Int
+}
