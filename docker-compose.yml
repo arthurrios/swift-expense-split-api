@@ -11,7 +11,7 @@
 #   Stop all: docker compose down
 #   Stop and remove volumes: docker compose down -v
 #
-
+  
 services:
   # PostgreSQL Database for Development
   postgres:

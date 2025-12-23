@@ -62,21 +62,23 @@ struct ExpenseController: RouteCollection {
                 )
             }
             
+            // Check if payer is already in activity
             let payerIsParticipant = try await ActivityParticipant.query(on: req.db)
                 .filter(\.$activity.$id == activityId)
                 .filter(\.$user.$id == payerId)
                 .first() != nil
             
-            guard payerIsParticipant else {
-                throw LocalizedAbortError(
-                    status: .forbidden,
-                    key: .expensePayerNotParticipant,
-                    arguments: [:],
-                    locale: req.locale
+            // If not in activity, automatically add them
+            if !payerIsParticipant {
+                let newParticipant = ActivityParticipant(
+                    activityID: activityId,
+                    userID: payerId
                 )
+                try await newParticipant.save(on: req.db)
             }
         }
         
+        // Validate participants exist and automatically add them to activity if not already participants
         for participantId in createRequest.participantsIds {
             guard let _ = try await User.find(participantId, on: req.db) else {
                 throw LocalizedAbortError(
@@ -87,18 +89,19 @@ struct ExpenseController: RouteCollection {
                 )
             }
             
+            // Check if participant is already in activity
             let participantIsInActivity = try await ActivityParticipant.query(on: req.db)
                 .filter(\.$activity.$id == activityId)
                 .filter(\.$user.$id == participantId)
                 .first() != nil
             
-            guard participantIsInActivity else {
-                throw LocalizedAbortError(
-                    status: .forbidden,
-                    key: .expenseParticipantNotInActivity,
-                    arguments: [:],
-                    locale: req.locale
+            // If not in activity, automatically add them
+            if !participantIsInActivity {
+                let newParticipant = ActivityParticipant(
+                    activityID: activityId,
+                    userID: participantId
                 )
+                try await newParticipant.save(on: req.db)
             }
         }
         
