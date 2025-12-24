@@ -26,7 +26,7 @@ struct BalanceController {
         }
         
         // Verify activity exists
-        guard let activity = try await Activity.find(activityId, on: req.db) else {
+        guard try await Activity.find(activityId, on: req.db) != nil else {
             throw LocalizedAbortError(
                 status: .notFound,
                 key: .activityNotFound,

@@ -46,10 +46,9 @@ enum EnvironmentLoader {
         
         // Parse and set environment variables
         var loadedCount = 0
-        var skippedCount = 0
         var invalidLines = 0
         
-        for (lineNumber, line) in fileContents.components(separatedBy: .newlines).enumerated() {
+        for (_, line) in fileContents.components(separatedBy: .newlines).enumerated() {
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)
             
             // Skip empty lines and comments

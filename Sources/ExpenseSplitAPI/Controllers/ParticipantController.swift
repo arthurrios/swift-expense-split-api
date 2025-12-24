@@ -30,7 +30,7 @@ struct ParticipantController: RouteCollection {
         let addRequest = try req.content.decode(AddParticipantsRequest.self)
         try addRequest.validate(on: req)
         
-        guard let activity = try await Activity.find(activityId, on: req.db) else {
+        guard try await Activity.find(activityId, on: req.db) != nil else {
             throw LocalizedAbortError(
                 status: .notFound,
                 key: .activityNotFound,
@@ -118,7 +118,7 @@ struct ParticipantController: RouteCollection {
             )
         }
         
-        guard let activity = try await Activity.find(activityId, on: req.db) else {
+        guard try await Activity.find(activityId, on: req.db) != nil else {
             throw LocalizedAbortError(
                 status: .notFound,
                 key: .activityNotFound,

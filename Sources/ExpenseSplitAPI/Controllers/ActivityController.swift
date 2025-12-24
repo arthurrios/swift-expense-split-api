@@ -256,11 +256,11 @@ struct ActivityController: RouteCollection {
       // Determine payment status
       let paymentStatus: String
       if fullyPaidCount == 0 && !hasPartialPayment {
-        paymentStatus = "Pending"
+        paymentStatus = "pending"
       } else if fullyPaidCount == expenseParticipants.count {
-        paymentStatus = "Paid"
+        paymentStatus = "paid"
       } else {
-        paymentStatus = "Partial"
+        paymentStatus = "partial"
       }
 
       expenseInfos.append(
