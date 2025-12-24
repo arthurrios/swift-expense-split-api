@@ -90,8 +90,14 @@ struct ActivityDetailResponse: Content {
     let amountInCents: Int
     let payerName: String?
     let payerId: UUID?
-    let participantsCount: Int
-    let participantsNames: [String]
+    let participants: [ExpenseParticipantInfo]
     let paymentStatus: String
+
+    struct ExpenseParticipantInfo: Content {
+      let id: UUID
+      let name: String
+      let email: String
+      let paymentStatus: String
+    }
   }
 }

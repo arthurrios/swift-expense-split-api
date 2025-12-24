@@ -220,20 +220,18 @@ struct ActivityController: RouteCollection {
       )
     }
 
-    // Process each expense to get participants names and payment status
+    // Process each expense to get participants with their payment status
     var expenseInfos: [ActivityDetailResponse.ExpenseInfo] = []
 
     for expense in activity.expenses {
-      // Get participant names
-      let participantsNames = expense.participants.map { $0.name }
-
-      // Calculate payment status
-      // Get all expense participants (debtors)
+      // Get all expense participants (debtors) with user info
       let expenseParticipants = try await ExpenseParticipant.query(on: req.db)
         .filter(\.$expense.$id == expense.id!)
+        .with(\.$user)
         .all()
 
-      // Check payment status for each participant
+      // Build participants array with individual payment status
+      var expenseParticipantsInfo: [ActivityDetailResponse.ExpenseInfo.ExpenseParticipantInfo] = []
       var fullyPaidCount = 0
       var hasPartialPayment = false
 
@@ -246,14 +244,29 @@ struct ActivityController: RouteCollection {
 
         let totalPaid = payments.reduce(0) { $0 + $1.amountPaidInCents }
 
+        // Determine individual payment status
+        let participantPaymentStatus: String
         if totalPaid >= ep.amountOwedInCents {
+          participantPaymentStatus = "paid"
           fullyPaidCount += 1
         } else if totalPaid > 0 {
+          participantPaymentStatus = "partial"
           hasPartialPayment = true
+        } else {
+          participantPaymentStatus = "pending"
         }
+
+        expenseParticipantsInfo.append(
+          ActivityDetailResponse.ExpenseInfo.ExpenseParticipantInfo(
+            id: ep.$user.id,
+            name: ep.user.name,
+            email: ep.user.email,
+            paymentStatus: participantPaymentStatus
+          )
+        )
       }
 
-      // Determine payment status
+      // Determine overall expense payment status
       let paymentStatus: String
       if fullyPaidCount == 0 && !hasPartialPayment {
         paymentStatus = "pending"
@@ -270,8 +283,7 @@ struct ActivityController: RouteCollection {
           amountInCents: expense.amountInCents,
           payerName: expense.payer?.name,
           payerId: expense.$payer.id,
-          participantsCount: expense.participants.count,
-          participantsNames: participantsNames,
+          participants: expenseParticipantsInfo,
           paymentStatus: paymentStatus
         ))
     }
