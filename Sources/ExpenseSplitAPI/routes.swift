@@ -164,6 +164,14 @@ func routes(_ app: Application) throws {
             response: .type(MarkPaymentResponse.self)
         )
     
+    protected.put("expenses", ":expenseId", "participants", ":participantId", "payment", "toggle", use: expenseController.toggleParticipantPayment)
+        .openAPI(
+            tags: "Expenses",
+            summary: "Toggle participant payment status",
+            description: "Toggles the payment status of a specific participant in an expense between 'pending' and 'paid'. If currently paid, sets to pending (clears payments). If pending or partial, sets to paid (pays full amount). Only activity participants can toggle payment status.",
+            response: .type(ToggleParticipantPaymentResponse.self)
+        )
+    
     protected.delete("expenses", ":expenseId", use: expenseController.delete)
         .openAPI(
             tags: "Expenses",
